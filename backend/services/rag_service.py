@@ -123,7 +123,12 @@ def answer_question(question, user, top_k=3):
 
     question_clean = question.strip().lower()
 
-    if question_clean in simple_greetings:
+    if (
+        question_clean in simple_greetings
+        or re.fullmatch(r"hi+", question_clean)
+        or re.fullmatch(r"hey+", question_clean)
+        or re.fullmatch(r"hello+", question_clean)
+    ):
         return {
             "answer": "Hello! How can I help you?",
             "sources": [],

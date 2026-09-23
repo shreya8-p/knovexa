@@ -56,18 +56,20 @@ STOP_WORDS = {
 }
 
 
-def search_similar_chunks(query, user, top_k=3):
+def search_similar_chunks(query, user=None, top_k=3):
 
     query_embedding = generate_embedding(query)
 
     all_chunks = list(
         DocumentChunk.objects
         .filter(
-            document__owner=user,
-            embedding__isnull=False,
+            embedding__isnull=False
         )
         .annotate(
-            distance=CosineDistance("embedding", query_embedding)
+            distance=CosineDistance(
+                "embedding",
+                query_embedding
+            )
         )
         .order_by("distance")
     )
@@ -76,13 +78,17 @@ def search_similar_chunks(query, user, top_k=3):
         return []
 
     query_words = set(
-        re.findall(r"[a-zA-Z]+", query.lower())
+        re.findall(
+            r"[a-zA-Z]+",
+            query.lower()
+        )
     )
 
     important_words = {
         word
         for word in query_words
-        if len(word) >= 3 and word not in STOP_WORDS
+        if len(word) >= 3
+        and word not in STOP_WORDS
     }
 
     if important_words:
@@ -95,7 +101,10 @@ def search_similar_chunks(query, user, top_k=3):
             content = chunk.content.lower()
             document_name = chunk.document.title.lower()
 
-            score = document_scores.get(document_id, 0)
+            score = document_scores.get(
+                document_id,
+                0
+            )
 
             for word in important_words:
 
@@ -109,7 +118,8 @@ def search_similar_chunks(query, user, top_k=3):
 
         matching_documents = [
             document_id
-            for document_id, score in document_scores.items()
+            for document_id, score
+            in document_scores.items()
             if score > 0
         ]
 
@@ -117,7 +127,8 @@ def search_similar_chunks(query, user, top_k=3):
 
             best_document = max(
                 matching_documents,
-                key=lambda document_id: document_scores[document_id]
+                key=lambda document_id:
+                document_scores[document_id]
             )
 
             document_chunks = [

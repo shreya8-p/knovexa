@@ -2,6 +2,7 @@ import {
   FileText,
   LogOut,
   MessageSquare,
+  Trash2,
   Upload,
   User,
 } from "lucide-react";
@@ -15,11 +16,12 @@ function Dashboard({ username, onLogout, onStartAsking }) {
   const [documents, setDocuments] = useState([]);
   const [showDocuments, setShowDocuments] = useState(false);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [deletingDocumentId, setDeletingDocumentId] = useState(null);
 
   const getToken = () => {
     return (
-      sessionStorage.getItem("knovexa_access")|| localStorage.getItem("knovexa_access")
-      
+      sessionStorage.getItem("knovexa_access") ||
+      localStorage.getItem("knovexa_access")
     );
   };
 
@@ -30,6 +32,7 @@ function Dashboard({ username, onLogout, onStartAsking }) {
 
     if (file.type !== "application/pdf") {
       setUploadMessage("Please select a PDF file.");
+      e.target.value = "";
       return;
     }
 
@@ -39,6 +42,7 @@ function Dashboard({ username, onLogout, onStartAsking }) {
       setUploadMessage(
         "Your session has expired. Please sign in again."
       );
+      e.target.value = "";
       return;
     }
 
@@ -119,14 +123,22 @@ function Dashboard({ username, onLogout, onStartAsking }) {
       console.log("Documents API response:", data);
 
       if (!response.ok) {
-        console.error("Document fetch failed:", data);
+        console.error(
+          "Document fetch failed:",
+          data
+        );
+
         setDocuments([]);
         return;
       }
 
       setDocuments(data);
     } catch (error) {
-      console.error("Document fetch error:", error);
+      console.error(
+        "Document fetch error:",
+        error
+      );
+
       setDocuments([]);
     } finally {
       setLoadingDocuments(false);
@@ -142,19 +154,85 @@ function Dashboard({ username, onLogout, onStartAsking }) {
     fetchDocuments();
   };
 
+  const handleDelete = async (documentId) => {
+    const token = getToken();
+
+    if (!token) {
+      alert(
+        "Your session has expired. Please sign in again."
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this document?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingDocumentId(documentId);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8001/api/documents/${documentId}/delete/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(
+          data.error ||
+          "Unable to delete this document."
+        );
+        return;
+      }
+
+      setDocuments((prevDocuments) =>
+        prevDocuments.filter(
+          (document) =>
+            document.id !== documentId
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Delete error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to the server."
+      );
+    } finally {
+      setDeletingDocumentId(null);
+    }
+  };
+
   return (
     <main className="dashboard">
+
       <header className="dashboard-header">
+
         <div className="dashboard-brand">
+
           <div className="dashboard-logo">
             <span></span>
             <span></span>
           </div>
 
           <span>Knovexa</span>
+
         </div>
 
         <div className="dashboard-user">
+
           <div className="user-avatar">
             <User size={18} />
           </div>
@@ -168,11 +246,15 @@ function Dashboard({ username, onLogout, onStartAsking }) {
           >
             <LogOut size={18} />
           </button>
+
         </div>
+
       </header>
 
       <section className="dashboard-content">
+
         <div className="dashboard-intro">
+
           <p className="dashboard-eyebrow">
             KNOWLEDGE COMPANION
           </p>
@@ -185,6 +267,7 @@ function Dashboard({ username, onLogout, onStartAsking }) {
             Upload your documents and start exploring
             your knowledge with Knovexa.
           </p>
+
         </div>
 
         <div className="dashboard-cards">
@@ -192,22 +275,27 @@ function Dashboard({ username, onLogout, onStartAsking }) {
           {/* Upload Documents */}
 
           <div className="dashboard-card">
+
             <div className="dashboard-card-icon">
               <Upload size={24} />
             </div>
 
-            <h2>Upload documents</h2>
+            <h2>
+              Upload documents
+            </h2>
 
             <p>
-              Add PDFs and other company documents to
-              your knowledge base.
+              Add PDFs and other company documents
+              to your knowledge base.
             </p>
 
             <input
               type="file"
               id="pdf-upload"
               accept=".pdf,application/pdf"
-              style={{ display: "none" }}
+              style={{
+                display: "none",
+              }}
               onChange={handleUpload}
               disabled={uploading}
             />
@@ -236,26 +324,32 @@ function Dashboard({ username, onLogout, onStartAsking }) {
                   marginBottom: "0",
                   minHeight: "auto",
                   fontSize: "12px",
-                  color: uploadMessage.includes(
-                    "successfully"
-                  )
-                    ? "#24613e"
-                    : "#b33a32",
+                  color:
+                    uploadMessage.includes(
+                      "successfully"
+                    )
+                      ? "#24613e"
+                      : "#b33a32",
+                  flex: "none",
                 }}
               >
                 {uploadMessage}
               </p>
             )}
+
           </div>
 
           {/* Ask Knovexa */}
 
           <div className="dashboard-card">
+
             <div className="dashboard-card-icon">
               <MessageSquare size={24} />
             </div>
 
-            <h2>Ask Knovexa</h2>
+            <h2>
+              Ask Knovexa
+            </h2>
 
             <p>
               Ask questions and get answers directly
@@ -268,17 +362,21 @@ function Dashboard({ username, onLogout, onStartAsking }) {
             >
               <MessageSquare size={17} />
               Start asking
-          </button>
+            </button>
+
           </div>
 
           {/* Your Documents */}
 
           <div className="dashboard-card">
+
             <div className="dashboard-card-icon">
               <FileText size={24} />
             </div>
 
-            <h2>Your documents</h2>
+            <h2>
+              Your documents
+            </h2>
 
             <p>
               View and manage the documents available
@@ -298,52 +396,64 @@ function Dashboard({ username, onLogout, onStartAsking }) {
                 ? "Hide documents"
                 : "View documents"}
             </button>
+
           </div>
+
         </div>
 
-        {/* Document List */}
-
         {showDocuments && (
+
           <div className="documents-section">
 
             <div className="documents-section-header">
-              <div>
-                <p className="dashboard-eyebrow">
-                  KNOWLEDGE BASE
-                </p>
 
+              <div>
                 <h2>Your documents</h2>
               </div>
 
               <button
                 type="button"
-                onClick={() => setShowDocuments(false)}
+                onClick={() =>
+                  setShowDocuments(false)
+                }
               >
-                Close
+                Hide
               </button>
+
             </div>
 
             {loadingDocuments ? (
-              <p className="documents-empty">
-                Loading your documents...
-              </p>
+
+              <div className="documents-empty">
+                Loading documents...
+              </div>
+
             ) : documents.length === 0 ? (
-              <p className="documents-empty">
-                No documents found.
-              </p>
+
+              <div className="documents-empty">
+                No documents uploaded yet.
+              </div>
+
             ) : (
+
               <div className="documents-list">
+
                 {documents.map((document) => (
+
                   <div
                     className="document-item"
                     key={document.id}
                   >
+
                     <div className="document-item-icon">
                       <FileText size={20} />
                     </div>
 
                     <div className="document-item-info">
-                      <h3>{document.title}</h3>
+
+                      <h3>
+                        {document.title}
+                      </h3>
 
                       <p>
                         Uploaded{" "}
@@ -351,15 +461,43 @@ function Dashboard({ username, onLogout, onStartAsking }) {
                           document.uploaded_at
                         ).toLocaleDateString()}
                       </p>
+
                     </div>
+
+                    <button
+                      type="button"
+                      className="document-delete-button"
+                      onClick={() =>
+                        handleDelete(document.id)
+                      }
+                      disabled={
+                        deletingDocumentId ===
+                        document.id
+                      }
+                      title="Delete document"
+                    >
+                      <Trash2 size={17} />
+
+                      {deletingDocumentId ===
+                      document.id
+                        ? "Deleting..."
+                        : "Delete"}
+                    </button>
+
                   </div>
+
                 ))}
+
               </div>
+
             )}
 
           </div>
+
         )}
+
       </section>
+
     </main>
   );
 }

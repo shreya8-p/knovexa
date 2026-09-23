@@ -190,22 +190,15 @@ function App() {
       <section className="hero-section">
         <div className="hero-content">
           <nav className="navbar">
-            <div className="brand brand-light">
-              <div className="brand-mark">
-                <span></span>
-                <span></span>
-              </div>
-
-              <span>Knovexa</span>
+          <div className="brand brand-light centered-brand">
+            <div className="brand-mark">
+              <span></span>
+              <span></span>
             </div>
 
-            <div className="nav-links">
-              <a href="#product">Product</a>
-              <a href="#solutions">Solutions</a>
-              <a href="#resources">Resources</a>
-              <a href="#pricing">Pricing</a>
-            </div>
-          </nav>
+            <span className="brand-text">Knovexa</span>
+          </div>
+        </nav>
 
           <div className="hero-main">
             <div className="eyebrow">
@@ -303,22 +296,13 @@ function App() {
         </div>
 
         <div className="auth-card">
-          <div className="auth-brand">
-            <div className="brand-mark brand-green">
-              <span></span>
-              <span></span>
-            </div>
-
-            <div>
+    
               <div className="auth-brand-name">
                 Knovexa
               </div>
 
-              <div className="auth-tagline">
-                Explore. Understand. Discover.
-              </div>
-            </div>
-          </div>
+              
+          
 
           <div className="auth-header">
             <h2>

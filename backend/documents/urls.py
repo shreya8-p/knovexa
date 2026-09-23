@@ -1,15 +1,14 @@
 from django.urls import path
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     DocumentUploadView,
     DocumentListView,
     RegisterView,
     ChatView,
+    DocumentDeleteView,
+    CustomTokenObtainPairView,
 )
 
 
@@ -22,7 +21,7 @@ urlpatterns = [
 
     path(
         'auth/login/',
-        TokenObtainPairView.as_view(),
+        CustomTokenObtainPairView.as_view(),
         name='token-obtain-pair'
     ),
 
@@ -42,6 +41,12 @@ urlpatterns = [
         'documents/',
         DocumentListView.as_view(),
         name='document-list'
+    ),
+
+    path(
+        'documents/<int:document_id>/delete/',
+        DocumentDeleteView.as_view(),
+        name='document-delete'
     ),
 
     path(
